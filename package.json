@@ -10,17 +10,26 @@
     "format": "biome format --write"
   },
   "dependencies": {
+    "@google/genai": "^1.41.0",
     "@next/env": "^16.1.6",
+    "@vercel/functions": "^3.4.2",
+    "@vis.gl/react-maplibre": "^8.1.0",
+    "axios": "^1.13.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "googleapis": "^171.4.0",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.564.0",
+    "mongoose": "^9.2.1",
     "next": "16.1.6",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-hook-form": "^7.71.1",
     "seishiro": "0.1.87-dev",
-    "tailwind-merge": "^3.4.0"
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.4.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
