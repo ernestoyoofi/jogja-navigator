@@ -7,6 +7,6 @@ const locationsSchema = new mongoose.Schema({
   longitude: { type: Number, required: true, min: -180, max: 180 }, // Longitude
   created_at: { type: Date, default: Date.now }, // Created at
 });
-const locationsModel = mongoose.model("locations", locationsSchema);
+const locationsModel = mongoose.models.locations || mongoose.model("locations", locationsSchema);
 
 export default locationsModel;

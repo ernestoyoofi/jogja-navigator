@@ -7,6 +7,6 @@ const planningsSchema = new mongoose.Schema({
   rating: { type: Number, required: true }, // Rating
   created_at: { type: Date, default: Date.now }, // Created at
 });
-const planningsModel = mongoose.model("plannings", planningsSchema);
+const planningsModel = mongoose.models.plannings || mongoose.model("plannings", planningsSchema);
 
 export default planningsModel;

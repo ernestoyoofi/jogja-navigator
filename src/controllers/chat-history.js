@@ -24,11 +24,13 @@ async function Chat_History({ system = {}, middleware = {}, data = {} } = {}) {
   }).sort({ created_at: -1 });
 
   return {
-    data: history.map((item) => ({
-      id: item.chat_id,
-      title: item.context.title || "New Conversation",
-      created_at: item.created_at,
-    }))
+    data: {
+      list: history.map((item) => ({
+        id: item.chat_id,
+        title: item.context.user_context,
+        created_at: item.created_at,
+      }))
+    }
   }
 }
 

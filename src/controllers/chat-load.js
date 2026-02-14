@@ -43,12 +43,14 @@ async function Chat_Load({
   }
 
   return {
-    data: chats.map((item) => ({
-      id: item._id,
-      type: item.type,
-      content: item.context,
-      created_at: item.created_at,
-    }))
+    data: {
+      list: chats.map((item) => ({
+        id: item._id,
+        type: item.type,
+        content: item.context,
+        created_at: item.created_at,
+      }))
+    }
   }
 }
 

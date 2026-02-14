@@ -8,6 +8,6 @@ const conversationsSchema = new mongoose.Schema({
   is_first: { type: Boolean, default: false }, // Is First Message
   created_at: { type: Date, default: Date.now }, // Created at
 });
-const conversationsModel = mongoose.model("conversations", conversationsSchema);
+const conversationsModel = mongoose.models.conversations || mongoose.model("conversations", conversationsSchema);
 
 export default conversationsModel;
