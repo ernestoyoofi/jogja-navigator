@@ -16,10 +16,8 @@ async function Location_Rating({
 
   // Validator
   const valid = Location_Rating_Valid(data)
-  if (valid.error) {
-    return {
-      error: valid.error
-    }
+  if (valid?.error) {
+    return valid
   }
 
   // Database Connection

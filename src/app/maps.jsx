@@ -13,6 +13,9 @@ export default function Maps() {
       },
       body: JSON.stringify({
         type: "chat:history",
+        data: {
+          
+        }
       }),
     })
       .then((res) => res.json())

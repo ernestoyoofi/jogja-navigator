@@ -1,4 +1,3 @@
-import Location_List_Valid from "@/validators/location-list";
 import InitDB_Mongoose from "@/lib/db.init";
 import Planning from "@/database/plannings";
 import Location from "@/database/locations"; // Import locations model for populate or lookup
@@ -12,14 +11,6 @@ async function Location_List({
   if (middleware.error) {
     return {
       error: middleware.error
-    }
-  }
-
-  // Validator (optional since it takes empty data, but good practice)
-  const valid = Location_List_Valid(data)
-  if (valid.error) {
-    return {
-      error: valid.error
     }
   }
 

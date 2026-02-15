@@ -15,10 +15,8 @@ async function Chat_Delete({
   }
   // Validator
   const valid = Chat_Delete_Valid(data)
-  if (valid.error) {
-    return {
-      error: valid.error
-    }
+  if (valid?.error) {
+    return valid
   }
 
   // Database Connection

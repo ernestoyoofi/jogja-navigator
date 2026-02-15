@@ -15,6 +15,7 @@ message.set("location-is-not-found", "Lokasi tidak ditemukan!");
 message.set("location-is-not-in-list", "Lokasi tidak ada dalam daftar kunjungan!");
 message.set("location-is-already-in-list", "Lokasi sudah ada dalam daftar kunjungan!");
 message.set("location-is-already-rated", "Lokasi sudah diberi rating!");
+// Input
 message.set("field-is-objectid", "Input {{field}} harus berupa format teks dengan 24 karakter (MongoDB ObjectId)!");
 message.set("field-is-required", "Input {{field}} wajib diisi!");
 message.set("field-is-string", "Format pada input {{field}} wajib berisi teks!");

@@ -17,10 +17,8 @@ async function Location_AddList({
 
   // Validator
   const valid = Location_AddList_Valid(data)
-  if (valid.error) {
-    return {
-      error: valid.error
-    }
+  if (valid?.error) {
+    return valid
   }
 
   // Database Connection
