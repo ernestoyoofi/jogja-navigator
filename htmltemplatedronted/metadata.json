@@ -1,0 +1,7 @@
+{
+  "name": "JogjaNavigator",
+  "description": "AI-powered travel exploration for Yogyakarta. Get personalized routes based on your budget and vibe, track your progress, and discover hidden gems.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
