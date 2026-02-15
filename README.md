@@ -1,4 +1,4 @@
-# Jogja Navigator
+# Jogja Navigator f
 
 **Jogja Navigator** is an AI-Powered Travel Map & Checklist application designed to help tourists explore Yogyakarta effortlessly. By chatting with an AI agent, users receive personalized travel recommendations based on their budget, time, and preferences, complete with an interactive map and checklist.
 
