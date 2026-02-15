@@ -23,7 +23,7 @@ RUN addgroup -g 1050 jogjanavigator \
 WORKDIR /app
 ENV NODE_ENV=production
 
-COPY --chown=jogjanavigator:jogjanavigator --from=build /app/public ./public
+# COPY --chown=jogjanavigator:jogjanavigator --from=build /app/public ./public
 COPY --chown=jogjanavigator:jogjanavigator --from=build /app/.next/standalone ./
 COPY --chown=jogjanavigator:jogjanavigator --from=build /app/.next/static ./.next/static
 
