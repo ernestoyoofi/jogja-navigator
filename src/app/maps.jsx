@@ -126,8 +126,8 @@ export default function Maps() {
     try {
       const payload = {
         message: userMsg,
-        latitude: String(userCoords.latitude),
-        longitude: String(userCoords.longitude),
+        latitude: userCoords.latitude,
+        longitude: userCoords.longitude,
       }
       if (chatId) payload.id = chatId
       const res = await apiQuery("chat:submit", payload)
