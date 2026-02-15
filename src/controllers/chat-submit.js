@@ -3,30 +3,16 @@ import { GoogleGenAI, Type } from "@google/genai";
 import Conversation from "@/database/conversations";
 import Chat_Submit_Valid from "@/validators/chat-submit";
 import InitDB_Mongoose from "@/lib/db.init";
+import crypto from "crypto";
 
 // AI 1 : AI Agent For Complex Planning & Deep Research
-const DeepSearchContextChat = `Role: Kamu adalah Lead Architect JogjaNavigator.
-Tugas: Analisis kebutuhan user (budget, waktu, vibe). 
-Input: Chat User, Longitude, Latitude, Time (GMT+7).
-Parameter Sistem Sekarang:
-{
-  "time": "{{time}}",
-  "latitude": "{{latitude}}",
-  "longitude": "{{longitude}}",
-}
-
+const DeepSearchContextChat = `Tugas: Analisis user & buat instruksi riset.
+Data: Waktu {{time}}, Lokasi {{latitude}},{{longitude}}, User {{username}}.
 Instruksi:
-1. Identifikasi niat user secara mendalam.
-2. Buat instruksi riset yang tajam untuk AI Model 2. 
-3. Fokus pada pencarian lokasi yang masuk akal secara geografis (dekat koordinat user) dan waktu (sedang buka).
-4. Jika user pertanyaan kurang jelas, bagian button response kamu isi dalam bentuk string array contoh umumnya ["<Pilihan 1>", "<Pilihan 2>", "<Pilihan 3>"] 
-
-Output wajib format JSON:
-{
-  "plan_analysis": "Analisis singkat dalam semi-bahasa Jawa",
-  "research_prompt": "Cari 6 lokasi di Jogja dengan kriteria: [Kriteria]. Pastikan dapat koordinat lat/lng, alamat lengkap, dan alasan kenapa ini cocok buat user.",
-  "button_response"?: ["<Pilihan 1>", "<Pilihan 2>", "<Pilihan 3>"] // Tidak wajib, tapi wajib untuk mencari jawaban user jauh lebih detail
-}`
+1. Pahami niat user.
+2. Buat "research_prompt" cari 6 lokasi valid (dekat & buka).
+3. Jika butuh info, isi "button_response" (array string).
+4. "plan_analysis" pakai bahasa santai/semi-Jawa.`
 const DeepSearchResponseSchema = {
   type: Type.OBJECT,
   required: ["plan_analysis", "research_prompt"],
@@ -46,41 +32,20 @@ const DeepSearchResponseSchema = {
   },
 }
 // AI 2 : AI Agent For Research Location Specifict Location & Date Time
-const ResearchContextChat = `Role: Kamu adalah Senior Researcher khusus area Yogyakarta.
-Tugas: Cari lokasi terbaik sesuai instruksi AI 1. Kamu harus memberikan data yang valid, bukan halusinasi.
-
-Instruksi Akhir:
-1. Berikan minimal 3 - 6 lokasi.
-2. Urutkan berdasarkan rank_recommend (1-10).
-3. Wajib memberikan latitude dan longitude yang akurat (format decimal).
-4. Output HARUS diawali dengan 'JSONFORMAT:' dan dilarang menggunakan markdown code blocks (\`\`\`).
-
-Format Output:
-JSONFORMAT:{"results":[{"name":"<Nama Tempat>","address":"<Alamat Lokasi>","rank_recommend":9}, ...(lainnya)]}`
+const ResearchContextChat = `Tugas: Cari lokasi valid di Jogja sesuai instruksi.
+Konteks: Saat ini {{time}}, User di {{latitude}},{{longitude}}.
+Syarat:
+- Min 3-6 lokasi.
+- Urutkan rank 1-10.
+- Lat/Long wajib akurat (decimal).
+- Output diawali 'JSONFORMAT:'.
+Format: JSONFORMAT:{"results":[{"name":"...","address":"...","rank_recommend":9,"latitude":...,"longitude":...}]}`
 // AI 3 : AI Agent For Finalizing & Formatting The Response (Context)
-const SummaryContextChat = `Role: Kamu adalah Front-man JogjaNavigator (Mas/Mbak Jogja).
-Tugas: Resume hasil riset dan buat JSON Final untuk UI.
-
+const SummaryContextChat = `Tugas: Rangkum hasil riset & format JSON final.
+Data: {{time}}, Lokasi User {{latitude}},{{longitude}}.
 Instruksi:
-1. Buat 'summary' dalam bahasa semi-Jawa yang sangat ramah (contoh: "Sugeng rawuh! niki daftar tempat sing paling jos...").
-2. Pastikan semua data koordinat dan alamat dari AI 2 masuk ke dalam array 'location'.
-3. Berikan minimal 3 location resultnya dan maksimal terbanyaknya 5 lokasi dari hasil resume diatas serta data dari reverse geo, jadikan satu lokasi serta data geonya.
-
-Format Output (Wajib Valid JSON):
-{
-  "result": {
-    "summary": "Teks ramah semi-Jawa di sini",
-    "location": [
-      {
-        "name": "string",
-        "address": "string",
-        "rank_recommend": number,
-        "latitude": number,
-        "longitude": number
-      }
-    ]
-  }
-}`
+1. "summary": Bahasa semi-Jawa ramah.
+2. "location": Gabungkan data riset (nama, alamat, coords). Max 5 lokasi terbaik.`
 const SummaryResponseSchema = {
   type: Type.OBJECT,
   required: ["summary", "location"],
@@ -154,6 +119,10 @@ async function Chat_Submit({
     hour12: false
   }).replace(",", " |");
 
+  // Generate ID
+  const idChat = crypto.randomBytes(12).toString("hex");
+  const chatId = data.id || idChat;
+
   // AI Setup
   const ai = new GoogleGenAI({
     apiKey: process.env["GEMINI_APIKEY"],
@@ -169,11 +138,33 @@ async function Chat_Submit({
     .select("_id type context is_first created_at")
     .sort({ created_at: 1 });
 
+  // Save User Chat
+  await Conversation.create({
+    user_id: middleware.profile.id,
+    chat_id: chatId,
+    type: "user",
+    context: {
+      message: data.message,
+      user_context: data.message,
+      latitude: data.latitude,
+      longitude: data.longitude
+    },
+    is_first: chatHistory.length === 0,
+  });
+
   // AI 1 : AI Agent For Complex Planning & Deep Research
   console.log("Generate Deep Search...")
   const deepSearch = await ai.models.generateContent({
     model: process.env.MODEL_AI_AGENT,
     contents: [
+      ...chatHistory.slice(0, 2).map((item) => ({
+        role: item.type === "user" ? "user" : "model",
+        parts: [
+          {
+            text: item.type === "user" ? item.context.message : item.context.summary,
+          },
+        ],
+      })),
       {
         role: "user",
         parts: [
@@ -190,22 +181,45 @@ async function Chat_Submit({
           text: DeepSearchContextChat
             .replace("{{time}}", formattedDate)
             .replace("{{latitude}}", data.latitude)
-            .replace("{{longitude}}", data.longitude),
+            .replace("{{longitude}}", data.longitude)
+            .replace("{{username}}", middleware.profile.username),
         }
       ],
       response_schema: DeepSearchResponseSchema,
     },
   });
   const deepSearchContent = deepSearch.candidates.map((candidate) => candidate.content.parts.map((part) => part.text).join("")).join("")
+  console.log(deepSearchContent)
   const deepSearchJson = JSON.parse(deepSearchContent.replace("```json", "").replace("```", ""))
   console.log(deepSearchJson)
+  if (deepSearchJson?.button_response) {
+    // Save AI Chat
+    await Conversation.create({
+      user_id: middleware.profile.id,
+      chat_id: chatId,
+      type: "model",
+      context: {
+        summary: deepSearchJson.plan_analysis,
+        buttons: deepSearchJson.button_response
+      },
+      is_first: false,
+    });
+
+    return {
+      data: {
+        id: idChat,
+        summary: deepSearchJson.plan_analysis,
+        buttons: deepSearchJson.button_response
+      }
+    }
+  }
   // AI 2 : AI Model For Research Location Specifict Location & Date Time
   console.log("Generate Research...")
   const research = await ai.models.generateContent({
     model: process.env.MODEL_AI_AGENT,
     contents: [
       {
-        role: "user",
+        role: "model",
         parts: [
           {
             text: deepSearchJson.research_prompt,
@@ -220,12 +234,14 @@ async function Chat_Submit({
           text: ResearchContextChat
             .replace("{{time}}", formattedDate)
             .replace("{{latitude}}", data.latitude)
-            .replace("{{longitude}}", data.longitude),
+            .replace("{{longitude}}", data.longitude)
+            .replace("{{username}}", middleware.profile.username),
         }
       ],
     },
   });
   const researchContent = research.candidates.map((candidate) => candidate.content.parts.map((part) => part.text).join("")).join("")
+  console.log(researchContent)
   const researchJson = JSON.parse(researchContent.replace("```json", "").replace("```", ""))
   console.log(researchJson)
   // AI 3 : AI Agent For Finalizing & Formatting The Response
@@ -249,19 +265,33 @@ async function Chat_Submit({
           text: SummaryContextChat
             .replace("{{time}}", formattedDate)
             .replace("{{latitude}}", data.latitude)
-            .replace("{{longitude}}", data.longitude),
+            .replace("{{longitude}}", data.longitude)
+            .replace("{{username}}", middleware.profile.username),
         }
       ],
       response_schema: SummaryResponseSchema,
     },
   });
   const summaryContent = summary.candidates.map((candidate) => candidate.content.parts.map((part) => part.text).join("")).join("")
-  const summaryJson = JSON.parse(summaryContent.replace("```json", "").replace("```", ""))
+  console.log(summaryContent)
+  const splitingMessage = summaryContent.split("JSONFORMAT:")
+  const summaryJson = JSON.parse(splitingMessage[1]?.replace("```json", "")?.replace("```", "") || "{}")
   console.log(summaryJson)
+
+  // Save AI Chat
+  await Conversation.create({
+    user_id: middleware.profile.id,
+    chat_id: chatId,
+    type: "assistant",
+    context: {
+      summary: summaryJson.summary,
+      location: summaryJson.location,
+    },
+    is_first: false,
+  });
 
   return {
     data: {
-      history_count: chatHistory.length,
       summary: summaryJson.summary,
       location: summaryJson.location,
     }
@@ -269,21 +299,3 @@ async function Chat_Submit({
 }
 
 export default Chat_Submit;
-
-Chat_Submit({
-  system: {},
-  middleware: {
-    profile: {
-      id: "6900808b73685a947974686b"
-    }
-  },
-  data: {
-    message: "Hii",
-    latitude: -7.78289109153371,
-    longitude: 110.3668836934281
-  },
-}).then((res) => {
-  console.log(res)
-}).catch((err) => {
-  console.log(err)
-})
