@@ -18,7 +18,7 @@ async function runTest() {
     longitude: 110.3695
   };
 
-  for (let i = 1; i <= 3; i++) {
+  for (let i = 1; i <= 1; i++) {
     console.log(`\n--- Iteration ${i} ---`);
     try {
       const result = await Chat_Submit({

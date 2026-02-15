@@ -228,7 +228,7 @@ async function Chat_Submit({
       },
     ],
     config: {
-      response_mime_type: "application/json",
+      googleSearch: {},
       systemInstruction: [
         {
           text: ResearchContextChat
