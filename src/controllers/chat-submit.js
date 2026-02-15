@@ -299,3 +299,21 @@ async function Chat_Submit({
 }
 
 export default Chat_Submit;
+
+Chat_Submit({
+  system: {},
+  middleware: {
+    profile: {
+      id: "6900808b73685a947974686b"
+    }
+  },
+  data: {
+    message: "Hii",
+    latitude: -7.78289109153371,
+    longitude: 110.3668836934281
+  },
+}).then((res) => {
+  console.log(res)
+}).catch((err) => {
+  console.log(err)
+})
