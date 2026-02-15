@@ -13,6 +13,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "googleapis": "^171.4.0",
+        "jsonrepair": "^3.13.2",
         "jsonwebtoken": "^9.0.3",
         "lucide-react": "^0.564.0",
         "maplibre-gl": "^5.18.0",
@@ -22,7 +23,7 @@
         "react": "19.2.3",
         "react-dom": "19.2.3",
         "react-hook-form": "^7.71.1",
-        "seishiro": "0.1.89-dev",
+        "seishiro": "0.1.90-dev",
         "sonner": "^2.0.7",
         "tailwind-merge": "^3.4.0",
         "zod": "^4.3.6",
@@ -843,6 +844,8 @@
 
     "jsonfile": ["jsonfile@6.2.0", "", { "dependencies": { "universalify": "^2.0.0" }, "optionalDependencies": { "graceful-fs": "^4.1.6" } }, "sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg=="],
 
+    "jsonrepair": ["jsonrepair@3.13.2", "", { "bin": { "jsonrepair": "bin/cli.js" } }, "sha512-Leuly0nbM4R+S5SVJk3VHfw1oxnlEK9KygdZvfUtEtTawNDyzB4qa1xWTmFt1aeoA7sXZkVTRuIixJ8bAvqVUg=="],
+
     "jsonwebtoken": ["jsonwebtoken@9.0.3", "", { "dependencies": { "jws": "^4.0.1", "lodash.includes": "^4.3.0", "lodash.isboolean": "^3.0.3", "lodash.isinteger": "^4.0.4", "lodash.isnumber": "^3.0.3", "lodash.isplainobject": "^4.0.6", "lodash.isstring": "^4.0.1", "lodash.once": "^4.0.0", "ms": "^2.1.1", "semver": "^7.5.4" } }, "sha512-MT/xP0CrubFRNLNKvxJ2BYfy53Zkm++5bX9dtuPbqAeQpTVe0MQTFhao8+Cp//EmJp244xt6Drw/GVEGCUj40g=="],
 
     "jwa": ["jwa@2.0.1", "", { "dependencies": { "buffer-equal-constant-time": "^1.0.1", "ecdsa-sig-formatter": "1.0.11", "safe-buffer": "^5.0.1" } }, "sha512-hRF04fqJIP8Abbkq5NKGN0Bbr3JxlQ+qhZufXVr0DvujKy93ZCbXZMHDL4EOtodSbCWxOqR8MS1tXA5hwqCXDg=="],
@@ -1093,7 +1096,7 @@
 
     "scheduler": ["scheduler@0.27.0", "", {}, "sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q=="],
 
-    "seishiro": ["seishiro@0.1.89-dev", "", {}, "sha512-q+UB324E1Oizi+f4tvmNI69HsXBshvtRQLfR+9P7whRYZxIGG8GecwKPfAnQpnF7WxIqJmlgz05GAQyMCgh/+A=="],
+    "seishiro": ["seishiro@0.1.90-dev", "", {}, "sha512-1jYPBnKNhYmqqbYJNCOTMWiTFSILl1W+lIkQqC/Cg6ki4PETMc5caN+cDFoRrK5oXSaOw+xJV3RZcrcGa5Jxdg=="],
 
     "semver": ["semver@7.7.4", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA=="],
 

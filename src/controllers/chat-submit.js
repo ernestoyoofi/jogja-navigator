@@ -4,6 +4,7 @@ import Conversation from "@/database/conversations";
 import Chat_Submit_Valid from "@/validators/chat-submit";
 import InitDB_Mongoose from "@/lib/db.init";
 import crypto from "crypto";
+import { jsonrepair } from "jsonrepair";
 
 // AI 1 : AI Agent For Complex Planning & Deep Research
 const DeepSearchContextChat = `Tugas: Analisis user & buat instruksi riset.
@@ -39,6 +40,7 @@ Syarat:
 - Urutkan rank 1-10.
 - Lat/Long wajib akurat (decimal).
 - Output diawali 'JSONFORMAT:'.
+- Pastikan juga format pada results adalah fixed JSON data ketika JSON.parse berjalan tidak error / crash
 Format: JSONFORMAT:{"results":[{"name":"...","address":"...","rank_recommend":9,"latitude":...,"longitude":...}]}`
 // AI 3 : AI Agent For Finalizing & Formatting The Response (Context)
 const SummaryContextChat = `Tugas: Rangkum hasil riset & format JSON final.
@@ -190,29 +192,9 @@ async function Chat_Submit({
   });
   const deepSearchContent = deepSearch.candidates.map((candidate) => candidate.content.parts.map((part) => part.text).join("")).join("")
   console.log(deepSearchContent)
-  const deepSearchJson = JSON.parse(deepSearchContent.replace("```json", "").replace("```", ""))
+  console.log(deepSearchContent)
+  const deepSearchJson = JSON.parse(jsonrepair(deepSearchContent))
   console.log(deepSearchJson)
-  if (deepSearchJson?.button_response) {
-    // Save AI Chat
-    await Conversation.create({
-      user_id: middleware.profile.id,
-      chat_id: chatId,
-      type: "model",
-      context: {
-        summary: deepSearchJson.plan_analysis,
-        buttons: deepSearchJson.button_response
-      },
-      is_first: false,
-    });
-
-    return {
-      data: {
-        id: idChat,
-        summary: deepSearchJson.plan_analysis,
-        buttons: deepSearchJson.button_response
-      }
-    }
-  }
   // AI 2 : AI Model For Research Location Specifict Location & Date Time
   console.log("Generate Research...")
   const research = await ai.models.generateContent({
@@ -242,7 +224,8 @@ async function Chat_Submit({
   });
   const researchContent = research.candidates.map((candidate) => candidate.content.parts.map((part) => part.text).join("")).join("")
   console.log(researchContent)
-  const researchJson = JSON.parse(researchContent.replace("```json", "").replace("```", ""))
+  console.log(researchContent)
+  const researchJson = JSON.parse(jsonrepair(researchContent.replace("JSONFORMAT:", "")))
   console.log(researchJson)
   // AI 3 : AI Agent For Finalizing & Formatting The Response
   console.log("Generate Summary...")
@@ -253,7 +236,7 @@ async function Chat_Submit({
         role: "user",
         parts: [
           {
-            text: deepSearchJson.plan_analysis,
+            text: deepSearchJson.research_prompt,
           },
         ],
       },
@@ -274,8 +257,7 @@ async function Chat_Submit({
   });
   const summaryContent = summary.candidates.map((candidate) => candidate.content.parts.map((part) => part.text).join("")).join("")
   console.log(summaryContent)
-  const splitingMessage = summaryContent.split("JSONFORMAT:")
-  const summaryJson = JSON.parse(splitingMessage[1]?.replace("```json", "")?.replace("```", "") || "{}")
+  const summaryJson = JSON.parse(summaryContent.replace("```json", "").replace("```", ""))
   console.log(summaryJson)
 
   // Save AI Chat
@@ -300,20 +282,20 @@ async function Chat_Submit({
 
 export default Chat_Submit;
 
-Chat_Submit({
-  system: {},
-  middleware: {
-    profile: {
-      id: "6900808b73685a947974686b"
-    }
-  },
-  data: {
-    message: "Hii",
-    latitude: -7.78289109153371,
-    longitude: 110.3668836934281
-  },
-}).then((res) => {
-  console.log(res)
-}).catch((err) => {
-  console.log(err)
-})
+// Chat_Submit({
+//   system: {},
+//   middleware: {
+//     profile: {
+//       id: "6900808b73685a947974686b"
+//     }
+//   },
+//   data: {
+//     message: "Hii",
+//     latitude: -7.78289109153371,
+//     longitude: 110.3668836934281
+//   },
+// }).then((res) => {
+//   console.log(res)
+// }).catch((err) => {
+//   console.log(err)
+// })
