@@ -3,8 +3,8 @@ FROM node:23.11.0-alpine AS base
 # Stage 1 : Install All Depedency
 FROM base AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json ./
+RUN npm i
 
 # Stage 2 : Building Application
 FROM base AS build
